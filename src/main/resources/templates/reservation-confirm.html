@@ -1,20 +1,37 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>予約内容確認</title>
+</head>
+
+<body>
+
+<h1>予約内容確認</h1>
+
+<p>お名前：<span th:text="${name}"></span></p>
+<p>フリガナ：<span th:text="${kana}"></span></p>
 <p>メールアドレス：<span th:text="${email}"></span></p>
-
 <p>電話番号：<span th:text="${phone}"></span></p>
-
 <p>学生・年齢：<span th:text="${studentAge}"></span></p>
-
 <p>ソフトテニス経験：<span th:text="${experience}"></span></p>
-
 <p>希望クラス：<span th:text="${classType}"></span></p>
 
 <p>お問い合わせ内容：</p>
-
 <p>
     <span th:text="${message}"></span>
 </p>
 
 <h2>この内容でよろしいですか？</h2>
+
+<!-- 確定で宜しいでしょうかボタン -->
+<form action="/reservation/complete" method="post">
+    <button type="submit">OK</button>
+</form>
+
+<!-- 戻るボタン -->
+<button type="button" onclick="history.back()">入力画面に戻る</button>
 
 </body>
 </html>
