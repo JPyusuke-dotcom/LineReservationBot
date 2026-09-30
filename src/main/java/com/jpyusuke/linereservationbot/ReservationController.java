@@ -38,14 +38,15 @@ public class ReservationController {
         model.addAttribute("classType", classType);
         model.addAttribute("message", message);
 
-    // 確認画面を表示する
-    return "reservation-confirm";
-}
+        // 確認画面を表示する
+        return "reservation-confirm";
+    }
 
-// 確認画面のOKボタンが押されたとき
-@PostMapping("/reservation/complete")
-public String complete() {
+    // 確認画面のOKボタンが押されたとき
+    @PostMapping("/reservation/complete")
+    public String complete() {
 
-    // 完了画面を表示する
-    return "reservation-complete";
+        // 完了画面を表示する
+        return "reservation-complete";
+    }
 }
