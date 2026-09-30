@@ -28,7 +28,7 @@ public class ReservationController {
             @RequestParam String message,
             Model model) {
 
-        // 入力された内容を確認画面に渡す
+        // 入力された内容を確認に渡す
         model.addAttribute("name", name);
         model.addAttribute("kana", kana);
         model.addAttribute("email", email);
@@ -38,7 +38,7 @@ public class ReservationController {
         model.addAttribute("classType", classType);
         model.addAttribute("message", message);
 
-        // 確認画面を表示
+        // 確認画面を表示するコード
         return "reservation-confirm";
     }
 }
