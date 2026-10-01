@@ -9,9 +9,19 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class ReservationController {
 
+    // 予約をDBに保存するためのService
+    private final ReservationService reservationService;
+
+    // ReservationServiceを受け取る
+    public ReservationController(ReservationService reservationService) {
+        this.reservationService = reservationService;
+    }
+
     // 予約フォームを表示する
     @GetMapping("/reservation")
     public String reservationForm() {
+
+        // reservation.htmlを表示する
         return "reservation";
     }
 
@@ -28,7 +38,23 @@ public class ReservationController {
             @RequestParam String message,
             Model model) {
 
-        // 入力された内容を確認に渡す
+        // 予約データを入れる箱を作る
+        Reservation reservation = new Reservation();
+
+        // フォームから受け取ったデータを箱に入れる
+        reservation.setName(name);
+        reservation.setKana(kana);
+        reservation.setEmail(email);
+        reservation.setPhone(phone);
+        reservation.setStudentAge(studentAge);
+        reservation.setExperience(experience);
+        reservation.setClassType(classType);
+        reservation.setMessage(message);
+
+        // DBに保存する
+        reservationService.saveReservation(reservation);
+
+        // 確認画面に入力内容を渡す
         model.addAttribute("name", name);
         model.addAttribute("kana", kana);
         model.addAttribute("email", email);
