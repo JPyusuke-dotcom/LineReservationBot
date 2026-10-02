@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,53 +10,106 @@
 
 <h1>予約・お問い合わせフォーム</h1>
 
-<form action="/reservation" method="post">
+<form action="/reservation"
+      method="post"
+      th:object="${reservationForm}">
 
     <!-- ① お名前 -->
     <label for="name">① お名前</label><br>
-    <input type="text" id="name" name="name" required>
+    <input type="text"
+           id="name"
+           th:field="*{name}"
+           required>
+
+    <div th:if="${#fields.hasErrors('name')}"
+         th:errors="*{name}">
+    </div>
+
     <br><br>
 
     <!-- ② フリガナ -->
     <label for="kana">② フリガナ（カタカナ）</label><br>
-    <input type="text" id="kana" name="kana"
+    <input type="text"
+           id="kana"
+           th:field="*{kana}"
            pattern="[ァ-ヶー　 ]+"
            placeholder="例：ミヤザキ　タロウ"
            required>
+
+    <div th:if="${#fields.hasErrors('kana')}"
+         th:errors="*{kana}">
+    </div>
+
     <br><br>
 
     <!-- ③ メールアドレス -->
     <label for="email">③ メールアドレス</label><br>
-    <input type="email" id="email" name="email" required>
+    <input type="email"
+           id="email"
+           th:field="*{email}"
+           required>
+
+    <div th:if="${#fields.hasErrors('email')}"
+         th:errors="*{email}">
+    </div>
+
     <br><br>
 
     <!-- ④ 電話番号 -->
     <label for="phone">④ 電話番号</label><br>
-    <input type="tel" id="phone" name="phone" required>
+    <input type="tel"
+           id="phone"
+           th:field="*{phone}"
+           required>
+
+    <div th:if="${#fields.hasErrors('phone')}"
+         th:errors="*{phone}">
+    </div>
+
     <br><br>
 
     <!-- ⑤ 学生・年齢 -->
     <label for="studentAge">⑤ 学生・年齢</label><br>
-    <input type="text" id="studentAge" name="studentAge"
+    <input type="text"
+           id="studentAge"
+           th:field="*{studentAge}"
            placeholder="例：高校生・17歳">
+
+    <div th:if="${#fields.hasErrors('studentAge')}"
+         th:errors="*{studentAge}">
+    </div>
+
     <br><br>
 
     <!-- ⑥ ソフトテニス経験 -->
     <label for="experience">⑥ ソフトテニス経験</label><br>
-    <select id="experience" name="experience" required>
+    <select id="experience"
+            th:field="*{experience}"
+            required>
+
         <option value="">選択してください</option>
         <option value="未経験/初心者">未経験/初心者</option>
         <option value="1年未満">1年未満</option>
         <option value="1～3年">1～3年</option>
         <option value="3～5年">3～5年</option>
         <option value="5年以上">5年以上</option>
-        <option value="現在部活動などで競技中">現在部活動などで競技中</option>
+        <option value="現在部活動などで競技中">
+            現在部活動などで競技中
+        </option>
     </select>
+
+    <div th:if="${#fields.hasErrors('experience')}"
+         th:errors="*{experience}">
+    </div>
+
     <br><br>
 
     <!-- ⑦ 希望クラス -->
     <label for="classType">⑦ 希望クラス</label><br>
-    <select id="classType" name="classType" required>
+    <select id="classType"
+            th:field="*{classType}"
+            required>
+
         <option value="">選択してください</option>
         <option value="VIPクラス">VIPクラス</option>
         <option value="EXクラス">EXクラス</option>
@@ -70,13 +123,24 @@
             まだ決まってない/相談したい
         </option>
     </select>
+
+    <div th:if="${#fields.hasErrors('classType')}"
+         th:errors="*{classType}">
+    </div>
+
     <br><br>
 
     <!-- ⑧ お問い合わせ内容 -->
     <label for="message">⑧ お問い合わせ内容</label><br>
-    <textarea id="message" name="message"
+    <textarea id="message"
+              th:field="*{message}"
               rows="6"
               placeholder="お問い合わせ内容をご入力ください"></textarea>
+
+    <div th:if="${#fields.hasErrors('message')}"
+         th:errors="*{message}">
+    </div>
+
     <br><br>
 
     <button type="submit">送信する</button>
