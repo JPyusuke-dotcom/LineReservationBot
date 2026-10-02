@@ -1,10 +1,13 @@
 package com.jpyusuke.linereservationbot;
 
+import jakarta.validation.Valid;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class ReservationController {
@@ -19,7 +22,10 @@ public class ReservationController {
 
     // 予約フォームを表示する
     @GetMapping("/reservation")
-    public String reservationForm() {
+    public String reservationForm(Model model) {
+
+        // 入力フォーム用のデータを用意する
+        model.addAttribute("reservationForm", new ReservationForm());
 
         // reservation.htmlを表示する
         return "reservation";
@@ -28,41 +34,42 @@ public class ReservationController {
     // フォームから送信された内容を受け取る
     @PostMapping("/reservation")
     public String reservation(
-            @RequestParam String name,
-            @RequestParam String kana,
-            @RequestParam String email,
-            @RequestParam String phone,
-            @RequestParam String studentAge,
-            @RequestParam String experience,
-            @RequestParam String classType,
-            @RequestParam String message,
+            @Valid @ModelAttribute("reservationForm") ReservationForm form,
+            BindingResult bindingResult,
             Model model) {
 
-        // 予約データを入れる箱を作る
+        // 入力エラーがあるか確認する
+        if (bindingResult.hasErrors()) {
+
+            // エラーがあればフォーム画面に戻る
+            return "reservation";
+        }
+
+        // DBに保存するためのReservationを作る
         Reservation reservation = new Reservation();
 
-        // フォームから受け取ったデータを箱に入れる
-        reservation.setName(name);
-        reservation.setKana(kana);
-        reservation.setEmail(email);
-        reservation.setPhone(phone);
-        reservation.setStudentAge(studentAge);
-        reservation.setExperience(experience);
-        reservation.setClassType(classType);
-        reservation.setMessage(message);
+        // フォームから受け取ったデータをReservationに入れる
+        reservation.setName(form.getName());
+        reservation.setKana(form.getKana());
+        reservation.setEmail(form.getEmail());
+        reservation.setPhone(form.getPhone());
+        reservation.setStudentAge(form.getStudentAge());
+        reservation.setExperience(form.getExperience());
+        reservation.setClassType(form.getClassType());
+        reservation.setMessage(form.getMessage());
 
         // DBに保存する
         reservationService.saveReservation(reservation);
 
         // 確認画面に入力内容を渡す
-        model.addAttribute("name", name);
-        model.addAttribute("kana", kana);
-        model.addAttribute("email", email);
-        model.addAttribute("phone", phone);
-        model.addAttribute("studentAge", studentAge);
-        model.addAttribute("experience", experience);
-        model.addAttribute("classType", classType);
-        model.addAttribute("message", message);
+        model.addAttribute("name", form.getName());
+        model.addAttribute("kana", form.getKana());
+        model.addAttribute("email", form.getEmail());
+        model.addAttribute("phone", form.getPhone());
+        model.addAttribute("studentAge", form.getStudentAge());
+        model.addAttribute("experience", form.getExperience());
+        model.addAttribute("classType", form.getClassType());
+        model.addAttribute("message", form.getMessage());
 
         // 確認画面を表示する
         return "reservation-confirm";
