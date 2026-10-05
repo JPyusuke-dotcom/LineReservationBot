@@ -1,6 +1,7 @@
 package com.jpyusuke.linereservationbot;
 
 import jakarta.validation.Valid;
+import jakarta.servlet.http.HttpSession;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -36,7 +37,8 @@ public class ReservationController {
     public String reservation(
             @Valid @ModelAttribute("reservationForm") ReservationForm form,
             BindingResult bindingResult,
-            Model model) {
+            Model model,
+            HttpSession session) {
 
         // 入力エラーがあるか確認する
         if (bindingResult.hasErrors()) {
@@ -45,21 +47,8 @@ public class ReservationController {
             return "reservation";
         }
 
-        // DBに保存するためのReservationを作る
-        Reservation reservation = new Reservation();
-
-        // フォームから受け取ったデータをReservationに入れる
-        reservation.setName(form.getName());
-        reservation.setKana(form.getKana());
-        reservation.setEmail(form.getEmail());
-        reservation.setPhone(form.getPhone());
-        reservation.setStudentAge(form.getStudentAge());
-        reservation.setExperience(form.getExperience());
-        reservation.setClassType(form.getClassType());
-        reservation.setMessage(form.getMessage());
-
-        // DBに保存する
-        reservationService.saveReservation(reservation);
+        // 入力された予約情報をセッションに保存する
+        session.setAttribute("reservationForm", form);
 
         // 確認画面に入力内容を渡す
         model.addAttribute("name", form.getName());
@@ -77,7 +66,35 @@ public class ReservationController {
 
     // 確認画面のOKボタンが押されたとき
     @PostMapping("/reservation/complete")
-    public String complete() {
+    public String complete(HttpSession session) {
+
+        // セッションから予約情報を取得する
+        ReservationForm form =
+                (ReservationForm) session.getAttribute("reservationForm");
+
+        // 予約情報が存在しない場合
+        if (form == null) {
+            return "redirect:/reservation";
+        }
+
+        // DBに保存するためのReservationを作る
+        Reservation reservation = new Reservation();
+
+        // フォームの内容をReservationに入れる
+        reservation.setName(form.getName());
+        reservation.setKana(form.getKana());
+        reservation.setEmail(form.getEmail());
+        reservation.setPhone(form.getPhone());
+        reservation.setStudentAge(form.getStudentAge());
+        reservation.setExperience(form.getExperience());
+        reservation.setClassType(form.getClassType());
+        reservation.setMessage(form.getMessage());
+
+        // ★ここで初めてDBに保存する
+        reservationService.saveReservation(reservation);
+
+        // 保存が終わったのでセッションから予約情報を削除する
+        session.removeAttribute("reservationForm");
 
         // 完了画面を表示する
         return "reservation-complete";
