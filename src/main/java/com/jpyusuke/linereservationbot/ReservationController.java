@@ -1,7 +1,7 @@
 package com.jpyusuke.linereservationbot;
 
-import jakarta.validation.Valid;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -23,9 +23,23 @@ public class ReservationController {
 
     // 予約フォームを表示する
     @GetMapping("/reservation")
-    public String reservationForm(Model model) {
+    public String reservationForm(
+            Model model,
+            HttpSession session) {
 
-        // 入力フォーム用のデータを用意する
+        // セッションに入力途中の予約情報があるか確認する
+        ReservationForm form =
+                (ReservationForm) session.getAttribute("reservationForm");
+
+        // あれば、その入力内容をフォームに表示する
+        if (form != null) {
+            model.addAttribute("reservationForm", form);
+
+            // セッションからは削除しない
+            return "reservation";
+        }
+
+        // なければ新しいフォームを用意する
         model.addAttribute("reservationForm", new ReservationForm());
 
         // reservation.htmlを表示する
@@ -90,13 +104,22 @@ public class ReservationController {
         reservation.setClassType(form.getClassType());
         reservation.setMessage(form.getMessage());
 
-        // ★ここで初めてDBに保存する
+        // DBに保存する
         reservationService.saveReservation(reservation);
 
-        // 保存が終わったのでセッションから予約情報を削除する
+        // セッションから予約情報を削除する
         session.removeAttribute("reservationForm");
 
         // 完了画面を表示する
         return "reservation-complete";
     }
+
+    // 確認画面から入力画面に戻る
+    @PostMapping("/reservation/back")
+    public String backToForm() {
+
+        // 予約フォームに戻る
+        return "redirect:/reservation";
+    }
 }
+
