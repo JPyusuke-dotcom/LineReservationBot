@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Google Cloud OAuth認証情報
+credentials/
+
