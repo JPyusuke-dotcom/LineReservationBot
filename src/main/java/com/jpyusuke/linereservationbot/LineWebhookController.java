@@ -1,8 +1,13 @@
 package com.jpyusuke.linereservationbot;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,42 +15,88 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @RestController
 public class LineWebhookController {
 
+    @Value("${line.channel-access-token}")
+    private String channelAccessToken;
+
     @PostMapping("/callback")
     public String callback(@RequestBody String body) throws Exception {
 
-        // LINEから届いたJSONを読み込む
         ObjectMapper mapper = new ObjectMapper();
         JsonNode json = mapper.readTree(body);
 
-        // eventsを取得する
         JsonNode events = json.get("events");
 
-        // eventsの中にデータがあるか確認する
         if (events != null && events.size() > 0) {
 
-            // 最初のイベントを取得する
             JsonNode event = events.get(0);
 
-            // メッセージを取得する
+            String replyToken = event.get("replyToken").asText();
+
             JsonNode message = event.get("message");
 
-            // メッセージの中身があるか確認する
             if (message != null) {
 
-                // ユーザーが入力した文字を取得する
                 String text = message.get("text").asText();
 
-                // コンソールに表示する
                 System.out.println("LINEから受信：" + text);
 
-                // 「予約」と入力された場合
                 if (text.equals("予約")) {
+
                     System.out.println("予約が入力されました！");
+
+                    String reservationUrl =
+                            "https://brisket-volley-ploy.ngrok-free.dev/callback";
+
+                    sendReply(
+                            replyToken,
+                            "予約フォームはこちらです。\n"
+                            + reservationUrl
+                    );
                 }
             }
         }
 
-        // LINEに正常に受け取ったことを返す
         return "OK";
+    }
+
+    private void sendReply(String replyToken, String messageText) {
+
+        String url =
+                "https://api.line.me/v2/bot/message/reply";
+
+        RestTemplate restTemplate =
+                new RestTemplate();
+
+        HttpHeaders headers =
+                new HttpHeaders();
+
+        headers.setContentType(
+                MediaType.APPLICATION_JSON
+        );
+
+        headers.setBearerAuth(
+                channelAccessToken
+        );
+
+        String requestBody =
+                "{"
+                + "\"replyToken\":\"" + replyToken + "\","
+                + "\"messages\":[{"
+                + "\"type\":\"text\","
+                + "\"text\":\"" + messageText + "\""
+                + "}]"
+                + "}";
+
+        HttpEntity<String> request =
+                new HttpEntity<>(
+                        requestBody,
+                        headers
+                );
+
+        restTemplate.postForEntity(
+                url,
+                request,
+                String.class
+        );
     }
 }
