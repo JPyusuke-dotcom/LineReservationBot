@@ -35,3 +35,5 @@ build/
 # Google Cloud OAuth認証情報
 credentials/
 
+# Google OAuth認証トークン
+tokens/
