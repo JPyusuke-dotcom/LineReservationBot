@@ -71,6 +71,27 @@
             <artifactId>jackson-databind</artifactId>
         </dependency>
 
+        <!-- Google Calendar APIを利用するための部品 -->
+        <dependency>
+            <groupId>com.google.api-client</groupId>
+            <artifactId>google-api-client</artifactId>
+            <version>2.0.0</version>
+        </dependency>
+
+        <!-- Google OAuth認証を行うための部品 -->
+        <dependency>
+            <groupId>com.google.oauth-client</groupId>
+            <artifactId>google-oauth-client-jetty</artifactId>
+            <version>1.34.1</version>
+        </dependency>
+
+        <!-- Google Calendar API本体 -->
+        <dependency>
+            <groupId>com.google.apis</groupId>
+            <artifactId>google-api-services-calendar</artifactId>
+            <version>v3-rev20220715-2.0.0</version>
+        </dependency>
+
         <!-- テスト用の部品 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
