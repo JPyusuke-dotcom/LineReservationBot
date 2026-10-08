@@ -9,52 +9,61 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class ReservationController {
 
-   // 予約をDBに保存するためのService
-private final ReservationService reservationService;
+    // 予約をDBに保存するためのService
+    private final ReservationService reservationService;
 
-// 予約通知メールを送信するService
-private final EmailService emailService;
+    // 予約通知メールを送信するService
+    private final EmailService emailService;
 
-// ReservationServiceとEmailServiceを受け取る
-public ReservationController(
-        ReservationService reservationService,
-        EmailService emailService) {
+    // ReservationServiceとEmailServiceを受け取る
+    public ReservationController(
+            ReservationService reservationService,
+            EmailService emailService) {
 
-    this.reservationService = reservationService;
-    this.emailService = emailService;
-}
-
+        this.reservationService = reservationService;
+        this.emailService = emailService;
+    }
 
     // 予約フォームを表示する
     @GetMapping("/reservation")
     public String reservationForm(
             Model model,
-            HttpSession session) {
+            HttpSession session,
+            @RequestParam(required = false) String lineUserId) {
 
-        // セッションに入力途中の予約情報があるか確認する
+        // LINEから渡されたユーザーIDをセッションに保存
+        if (lineUserId != null && !lineUserId.isBlank()) {
+            session.setAttribute("lineUserId", lineUserId);
+        }
+
+        // 以前入力した予約情報がセッションに残っているか確認
         ReservationForm form =
                 (ReservationForm) session.getAttribute("reservationForm");
 
-        // あれば、その入力内容をフォームに表示する
+        // 予約情報が残っている場合
         if (form != null) {
+
+            // その予約情報をフォームに表示する
             model.addAttribute("reservationForm", form);
 
-            // セッションからは削除しない
             return "reservation";
         }
 
-        // なければ新しいフォームを用意する
-        model.addAttribute("reservationForm", new ReservationForm());
+        // 新しい予約フォームを作成する
+        model.addAttribute(
+                "reservationForm",
+                new ReservationForm()
+        );
 
-        // reservation.htmlを表示する
         return "reservation";
     }
 
-    // フォームから送信された内容を受け取る
+    // 予約フォームから送信された内容を受け取る
     @PostMapping("/reservation")
     public String reservation(
             @Valid @ModelAttribute("reservationForm") ReservationForm form,
@@ -116,9 +125,9 @@ public ReservationController(
         reservationService.saveReservation(reservation);
 
         // 予約通知メールを送信する
-         emailService.sendReservationNotification(reservation);
+        emailService.sendReservationNotification(reservation);
 
-         // セッションから予約情報を削除する
+        // セッションから予約情報を削除する
         session.removeAttribute("reservationForm");
 
         // 完了画面を表示する
