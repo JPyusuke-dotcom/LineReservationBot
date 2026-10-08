@@ -13,13 +13,21 @@ import org.springframework.web.bind.annotation.PostMapping;
 @Controller
 public class ReservationController {
 
-    // 予約をDBに保存するためのService
-    private final ReservationService reservationService;
+   // 予約をDBに保存するためのService
+private final ReservationService reservationService;
 
-    // ReservationServiceを受け取る
-    public ReservationController(ReservationService reservationService) {
-        this.reservationService = reservationService;
-    }
+// 予約通知メールを送信するService
+private final EmailService emailService;
+
+// ReservationServiceとEmailServiceを受け取る
+public ReservationController(
+        ReservationService reservationService,
+        EmailService emailService) {
+
+    this.reservationService = reservationService;
+    this.emailService = emailService;
+}
+
 
     // 予約フォームを表示する
     @GetMapping("/reservation")
@@ -107,7 +115,10 @@ public class ReservationController {
         // DBに保存する
         reservationService.saveReservation(reservation);
 
-        // セッションから予約情報を削除する
+        // 予約通知メールを送信する
+         emailService.sendReservationNotification(reservation);
+
+         // セッションから予約情報を削除する
         session.removeAttribute("reservationForm");
 
         // 完了画面を表示する
@@ -122,4 +133,3 @@ public class ReservationController {
         return "redirect:/reservation";
     }
 }
-
