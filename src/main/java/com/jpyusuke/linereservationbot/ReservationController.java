@@ -20,13 +20,18 @@ public class ReservationController {
     // 予約通知メールを送信するService
     private final EmailService emailService;
 
-    // ReservationServiceとEmailServiceを受け取る
+    // LINEへ予約完了通知を送信するService
+    private final LinePushService linePushService;
+
+    // ReservationService、EmailService、LinePushServiceを受け取る
     public ReservationController(
             ReservationService reservationService,
-            EmailService emailService) {
+            EmailService emailService,
+            LinePushService linePushService) {
 
         this.reservationService = reservationService;
         this.emailService = emailService;
+        this.linePushService = linePushService;
     }
 
     // 予約フォームを表示する
@@ -97,7 +102,7 @@ public class ReservationController {
 
     // 確認画面のOKボタンが押されたとき
     @PostMapping("/reservation/complete")
-    public String complete(HttpSession session) {
+    public String complete(HttpSession session) throws Exception {
 
         // セッションから予約情報を取得する
         ReservationForm form =
@@ -127,8 +132,26 @@ public class ReservationController {
         // 予約通知メールを送信する
         emailService.sendReservationNotification(reservation);
 
+        // セッションからLINEユーザーIDを取得する
+        String lineUserId =
+                (String) session.getAttribute("lineUserId");
+
+        // LINEユーザーIDが存在する場合
+        if (lineUserId != null && !lineUserId.isBlank()) {
+
+            // LINEへ予約完了通知を送信する
+            linePushService.sendMessage(
+                    lineUserId,
+                    "予約を受け付けました！\n"
+                    + "ご予約ありがとうございます。"
+            );
+        }
+
         // セッションから予約情報を削除する
         session.removeAttribute("reservationForm");
+
+        // セッションからLINEユーザーIDも削除する
+        session.removeAttribute("lineUserId");
 
         // 完了画面を表示する
         return "reservation-complete";
