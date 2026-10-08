@@ -1,5 +1,9 @@
 package com.jpyusuke.linereservationbot;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -44,8 +48,8 @@ public class LineWebhookController {
 
                     System.out.println("予約が入力されました！");
 
-                    String reservationUrl =
-                            "https://brisket-volley-ploy.ngrok-free.dev/callback";
+                   String reservationUrl =
+                    "https://brisket-volley-ploy.ngrok-free.dev/reservation";
 
                     sendReply(
                             replyToken,
@@ -59,7 +63,7 @@ public class LineWebhookController {
         return "OK";
     }
 
-    private void sendReply(String replyToken, String messageText) {
+    private void sendReply(String replyToken, String messageText) throws Exception {
 
         String url =
                 "https://api.line.me/v2/bot/message/reply";
@@ -78,18 +82,27 @@ public class LineWebhookController {
                 channelAccessToken
         );
 
-        String requestBody =
-                "{"
-                + "\"replyToken\":\"" + replyToken + "\","
-                + "\"messages\":[{"
-                + "\"type\":\"text\","
-                + "\"text\":\"" + messageText + "\""
-                + "}]"
-                + "}";
+        Map<String, Object> message =
+                new HashMap<>();
+
+        message.put("type", "text");
+        message.put("text", messageText);
+
+        Map<String, Object> requestBody =
+                new HashMap<>();
+
+        requestBody.put("replyToken", replyToken);
+        requestBody.put("messages", List.of(message));
+
+        ObjectMapper mapper =
+                new ObjectMapper();
+
+        String jsonBody =
+                mapper.writeValueAsString(requestBody);
 
         HttpEntity<String> request =
                 new HttpEntity<>(
-                        requestBody,
+                        jsonBody,
                         headers
                 );
 
@@ -100,3 +113,4 @@ public class LineWebhookController {
         );
     }
 }
+
