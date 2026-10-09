@@ -24,44 +24,45 @@ import com.google.api.services.calendar.CalendarScopes;
 @Service
 public class GoogleCalendarService {
 
-    // Google Calendar APIで使用するJSON処理
+    // Google Calendar APIでJSONを扱うための設定
     private static final JsonFactory JSON_FACTORY =
             GsonFactory.getDefaultInstance();
 
-    // OAuth認証情報を保存するフォルダ
+    // Google OAuth認証後に取得したトークンを保存するフォルダ
     private static final String TOKENS_DIRECTORY_PATH =
             "tokens";
 
-    // Google Calendarの予定を操作するための権限
+    // Google Calendarの予定を操作するために必要な権限
     private static final java.util.List<String> SCOPES =
             Collections.singletonList(
                     CalendarScopes.CALENDAR_EVENTS
             );
 
-    // Google Calendarへ接続する
+    // Google Calendarへ接続するための処理
     public Calendar getCalendarService() throws Exception {
 
-        // GoogleのHTTP通信に必要な設定
+        // GoogleとHTTPS通信を行うための設定
         final NetHttpTransport HTTP_TRANSPORT =
                 GoogleNetHttpTransport.newTrustedTransport();
 
-        // Google Cloudからダウンロードした認証情報JSON
+         // Google CloudからダウンロードしたOAuth認証情報JSONを指定
         File credentialsFile =
                 new File(
-                        "credentials/client_secret_1029442115423-hg3mk48vvfueojduitjalkqbgr4a43fm.apps.googleusercontent.com.json"
+                        "credentials/client_secret_100328985002-epmkf9623t69bhm5s89v6aohg27o88nv.apps.googleusercontent.com.json"
                 );
 
-        // 認証情報JSONを読み込む
+        // 認証情報JSONをファイルから読み込む
         InputStream in =
                 new FileInputStream(credentialsFile);
 
+        // 読み込んだJSONからGoogle OAuthの設定情報を取得
         GoogleClientSecrets clientSecrets =
                 GoogleClientSecrets.load(
                         JSON_FACTORY,
                         new InputStreamReader(in)
                 );
 
-        // OAuth認証の流れを作成
+        // Google OAuth認証の流れを作成
         GoogleAuthorizationCodeFlow flow =
                 new GoogleAuthorizationCodeFlow.Builder(
                         HTTP_TRANSPORT,
@@ -69,27 +70,34 @@ public class GoogleCalendarService {
                         clientSecrets,
                         SCOPES
                 )
+                // 認証後に取得したトークンを保存する場所を指定
                 .setDataStoreFactory(
                         new FileDataStoreFactory(
                                 new File(TOKENS_DIRECTORY_PATH)
                         )
                 )
+                // 認証後も利用できるように設定
                 .setAccessType("offline")
                 .build();
 
-        // ブラウザを使ってGoogleアカウントを認証
+        // Google認証後に戻ってくるためのローカルサーバーを作成
+        // 127.0.0.1は自分のPC自身を表すアドレス
+        // ポート番号0は、空いているポートを自動的に選択する指定
         LocalServerReceiver receiver =
                 new LocalServerReceiver.Builder()
-                        .setPort(8888)
+                        .setHost("127.0.0.1")
+                        .setPort(0)
                         .build();
 
+        // Googleのログイン・アクセス許可画面を表示し、
+        // 認証が完了したらアクセストークンを取得
         Credential credential =
                 new AuthorizationCodeInstalledApp(
                         flow,
                         receiver
                 ).authorize("user");
 
-        // Google Calendar APIへ接続
+        // 認証済みの情報を使ってGoogle Calendar APIへ接続
         return new Calendar.Builder(
                 HTTP_TRANSPORT,
                 JSON_FACTORY,
@@ -99,3 +107,4 @@ public class GoogleCalendarService {
         .build();
     }
 }
+
